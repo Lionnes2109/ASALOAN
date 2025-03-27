@@ -37,22 +37,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     error_log("Comprehensive Loan Application Attempt - User ID: " . $_SESSION['user_id']);
 
     // Sanitize and validate inputs
-    $loan_amount = filter_input(INPUT_POST, 'loan_amount', FILTER_VALIDATE_FLOAT);
-    $loan_purpose = filter_input(INPUT_POST, 'loan_purpose', FILTER_SANITIZE_STRING);
-    $first_name = filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_STRING);
-    $last_name = filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_STRING);
-    $middle_name = filter_input(INPUT_POST, 'middle_name', FILTER_SANITIZE_STRING);
-    $birthdate = filter_input(INPUT_POST, 'birthdate', FILTER_SANITIZE_STRING);
-    $gender = filter_input(INPUT_POST, 'gender', FILTER_SANITIZE_STRING);
-    $civil_status = filter_input(INPUT_POST, 'civil_status', FILTER_SANITIZE_STRING);
-    $mobile_number = filter_input(INPUT_POST, 'mobile_number', FILTER_SANITIZE_STRING);
-    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-    $address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
-    $province = filter_input(INPUT_POST, 'province', FILTER_SANITIZE_STRING);
-    $city = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_STRING);
-    $barangay = filter_input(INPUT_POST, 'barangay', FILTER_SANITIZE_STRING);
-    $employment_type = filter_input(INPUT_POST, 'employment_type', FILTER_SANITIZE_STRING);
-    $monthly_income = filter_input(INPUT_POST, 'monthly_income', FILTER_VALIDATE_FLOAT);
+// Sanitize and validate inputs
+$loan_amount = filter_input(INPUT_POST, 'loan_amount', FILTER_VALIDATE_FLOAT);
+$loan_purpose = filter_input(INPUT_POST, 'loan_purpose', FILTER_SANITIZE_SPECIAL_CHARS);
+$first_name = filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_SPECIAL_CHARS);
+$last_name = filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_SPECIAL_CHARS);
+$middle_name = filter_input(INPUT_POST, 'middle_name', FILTER_SANITIZE_SPECIAL_CHARS);
+$birthdate = filter_input(INPUT_POST, 'birthdate', FILTER_SANITIZE_SPECIAL_CHARS);
+$gender = filter_input(INPUT_POST, 'gender', FILTER_SANITIZE_SPECIAL_CHARS);
+$civil_status = filter_input(INPUT_POST, 'civil_status', FILTER_SANITIZE_SPECIAL_CHARS);
+$mobile_number = filter_input(INPUT_POST, 'mobile_number', FILTER_SANITIZE_SPECIAL_CHARS);
+$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+$address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_SPECIAL_CHARS);
+$province = filter_input(INPUT_POST, 'province', FILTER_SANITIZE_SPECIAL_CHARS);
+$city = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_SPECIAL_CHARS);
+$barangay = filter_input(INPUT_POST, 'barangay', FILTER_SANITIZE_SPECIAL_CHARS);
+$employment_type = filter_input(INPUT_POST, 'employment_type', FILTER_SANITIZE_SPECIAL_CHARS);
+$monthly_income = filter_input(INPUT_POST, 'monthly_income', FILTER_VALIDATE_FLOAT);
 
     // Validate inputs
     $validation_errors = [];
