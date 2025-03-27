@@ -235,116 +235,140 @@ $section = isset($_GET['section']) ? $_GET['section'] : 'view_applications';  //
             <h2>Welcome, Admin</h2>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
+        
 
-        <!-- Dynamic Content Based on Selected Section -->
         <?php if ($section == 'view_applications'): ?>
-            <div class="data-table">
-                <h3>Loan Applications</h3>
-                <?php
-                // Fetch loan applications
-                $sql = "SELECT loan_applications.*, users.* FROM loan_applications JOIN users ON loan_applications.borrower_id = users.id";
-                $result = $conn->query($sql);
-                ?>
+    <div class="data-table">
+        <h3>Loan Applications</h3>
+        <?php
+        // Fetch loan applications with specific columns
+        $sql = "SELECT loan_applications.id AS loan_id, loan_applications.amount, loan_applications.purpose, loan_applications.status, users.username 
+                FROM loan_applications 
+                JOIN users ON loan_applications.borrower_id = users.id";
+        $result = $conn->query($sql);
+        ?>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Borrower</th>
-                            <th>Loan Amount</th>
-                            <th>Purpose</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($row = $result->fetch_assoc()) { ?>
-                            <tr>
-                                <td><?php echo $row['username']; ?></td>
-                                <td><?php echo $row['amount']; ?></td>
-                                <td><?php echo $row['purpose']; ?></td>
-                                <td><?php echo $row['status']; ?></td>
-                                <td class="action-links">
-                                    <a href="?section=review_application&id=<?php echo $row['id']; ?>" class="review-btn">Review</a>
-                                </td>
-                            </tr>
-                        <?php } ?>
-                    </tbody>
-                </table>
-            </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Borrower</th>
+                    <th>Loan Amount</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $result->fetch_assoc()) { ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['username']); ?></td>
+                        <td><?php echo htmlspecialchars(number_format($row['amount'], 2)); ?></td>
+                        <td><?php echo htmlspecialchars($row['purpose']); ?></td>
+                        <td><?php echo htmlspecialchars($row['status']); ?></td>
+                        <td class="action-links">
+                            <a href="?section=review_application&id=<?php echo $row['loan_id']; ?>" class="review-btn">Review</a>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
 
-        <?php elseif ($section == 'review_application'): ?>
-            <div class="review-section">
-                <h3>Detailed Application Review</h3>
-                <?php
-                // Fetch detailed application information
-                if (isset($_GET['id'])) {
-                    $loan_id = $_GET['id'];
-                    $sql = "SELECT loan_applications.*, users.* FROM loan_applications JOIN users ON loan_applications.borrower_id = users.id WHERE loan_applications.id = $loan_id";
-                    $result = $conn->query($sql);
-                    $application = $result->fetch_assoc();
-                }
-                ?>
+            <?php elseif ($section == 'review_application'): ?>
+    <div class="review-section">
+        <h3>Detailed Application Review</h3>
+        <?php
+        // Check if ID is provided
+        if (isset($_GET['id'])) {
+            $loan_id = $_GET['id'];
 
+            // Use prepared statement to prevent SQL injection
+            $sql = "SELECT loan_applications.*, users.username 
+                    FROM loan_applications 
+                    JOIN users ON loan_applications.borrower_id = users.id 
+                    WHERE loan_applications.id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("i", $loan_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $application = $result->fetch_assoc();
+
+            // Check if application exists
+            if ($application) {
+        ?>
                 <div class="review-field">
                     <label>Full Name</label>
-                    <input type="text" value="<?php echo $application['first_name'] . ' ' . $application['middle_name'] . ' ' . $application['last_name']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['first_name'] . ' ' . ($application['middle_name'] ?? '') . ' ' . $application['last_name']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Gender</label>
-                    <input type="text" value="<?php echo $application['gender']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['gender']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Date of Birth</label>
-                    <input type="text" value="<?php echo $application['birthdate']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['birthdate']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Civil Status</label>
-                    <input type="text" value="<?php echo $application['civil_status']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['civil_status']); ?>" readonly>
                 </div>
 
                 <h4>Contact Information</h4>
                 <div class="review-field">
                     <label>Mobile Number</label>
-                    <input type="text" value="<?php echo $application['mobile_number']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['mobile_number']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Email</label>
-                    <input type="text" value="<?php echo $application['email']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['email']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Address</label>
-                    <input type="text" value="<?php echo $application['address'] . ', ' . $application['barangay'] . ', ' . $application['city'] . ', ' . $application['province']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['address'] . ', ' . $application['barangay'] . ', ' . $application['city'] . ', ' . $application['province']); ?>" readonly>
                 </div>
 
                 <h4>Employment Details</h4>
                 <div class="review-field">
                     <label>Employment Type</label>
-                    <input type="text" value="<?php echo $application['employment_type']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['employment_type']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Monthly Income</label>
-                    <input type="text" value="<?php echo $application['monthly_income']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars(number_format($application['monthly_income'], 2)); ?>" readonly>
                 </div>
 
                 <h4>Loan Details</h4>
                 <div class="review-field">
                     <label>Loan Amount</label>
-                    <input type="text" value="<?php echo $application['amount']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars(number_format($application['amount'], 2)); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Loan Purpose</label>
-                    <input type="text" value="<?php echo $application['purpose']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['purpose']); ?>" readonly>
                 </div>
                 <div class="review-field">
                     <label>Identification Type</label>
-                    <input type="text" value="<?php echo $application['valid_id_type']; ?>" readonly>
+                    <input type="text" value="<?php echo htmlspecialchars($application['valid_id_type'] ?? 'Not Provided'); ?>" readonly>
+                </div>
+                <div class="review-field">
+                    <label>Current Status</label>
+                    <input type="text" value="<?php echo htmlspecialchars($application['status']); ?>" readonly>
                 </div>
 
                 <div class="action-buttons">
                     <a href="?section=approve_loan&id=<?php echo $loan_id; ?>&action=approve" class="approve-btn">Approve Application</a>
                     <a href="?section=approve_loan&id=<?php echo $loan_id; ?>&action=reject" class="reject-btn">Reject Application</a>
                 </div>
-            </div>
+        <?php
+            } else {
+                echo "<p>No application found with ID: " . htmlspecialchars($loan_id) . "</p>";
+            }
+            $stmt->close();
+        } else {
+            echo "<p>No application ID provided.</p>";
+        }
+        ?>
+    </div>
 
         <?php elseif ($section == 'disburse_loans'): ?>
             <div class="data-table">
@@ -447,7 +471,7 @@ $section = isset($_GET['section']) ? $_GET['section'] : 'view_applications';  //
             </div>
 
         <?php else: ?>
-            <p>Select a section to begin.</p>
+            <p>Select a section to begin.</p> 
         <?php endif; ?>
     </div>
 </div>
